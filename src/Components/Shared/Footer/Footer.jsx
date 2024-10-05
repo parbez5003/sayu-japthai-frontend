@@ -52,7 +52,7 @@ export default function Footer() {
                                     <Link to={'/'} className="text-gray-300 hover:text-white">Home</Link>
                                 </li>
                                 <li className="mb-6">
-                                    <Link className=" text-gray-300 hover:text-white">About</Link>
+                                    <Link to={"/about"} className=" text-gray-300 hover:text-white">About </Link>
                                 </li>
                                 <li>
                                     <Link to={'/'} className=" text-gray-300 hover:text-white">Pricing</Link>
