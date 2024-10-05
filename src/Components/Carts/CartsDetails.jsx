@@ -22,7 +22,7 @@ const CartsDetails = ({ cart, myCartRefetch, i }) => {
 
 
     const handleIncrement = async (id) => {
-        if (quantity < cart?.stock_limit) {
+        if (quantity) {
             const newQuantity = quantity + 1;
             const newTotalPrice = newQuantity * cart?.unit_price;
 
@@ -38,7 +38,7 @@ const CartsDetails = ({ cart, myCartRefetch, i }) => {
                 toast.error("Failed to update quantity.");
             }
         } else {
-            setError(`Oops, this Food's limit is ${cart?.stock_limit}`);
+            setError(`Oops, this Food's limit is`);
         }
     };
 
@@ -115,7 +115,7 @@ const CartsDetails = ({ cart, myCartRefetch, i }) => {
                 </td>
                 <td className="border bg-black border-gray-600 p-2 text-sm md:text-md text-center">
                     <div className="flex items-center justify-center gap-1">
-                        <FaEuroSign /> {cart?.unit_price}
+                        <FaEuroSign /> {cart?.unit_price.toFixed(2)}
                     </div>
                 </td>
 
@@ -136,7 +136,7 @@ const CartsDetails = ({ cart, myCartRefetch, i }) => {
                 <td className="border bg-black border-gray-600 p-2 text-sm md:text-md text-center">
 
                     <div className="flex items-center justify-center gap-1">
-                        <FaEuroSign /> {cart?.total_price}
+                        <FaEuroSign /> {(cart?.total_price).toFixed(2)}
                     </div>
                     
                 </td>
@@ -160,7 +160,13 @@ const CartsDetails = ({ cart, myCartRefetch, i }) => {
                 onClose={() => setIsModalOpen(false)}
                 onConfirm={handleConfirmDelete}
                 title={`Delete product`}
-                text={`Are you sure you want to delete the product "${selectedProduct.name}"?`}
+                text={(
+                    <>
+                        Are you sure you want to delete the product "
+                        <span className="text-red-600 text-xl mx-2 ">{selectedProduct.name}</span>
+                        "?
+                    </>
+                )}
             />
         </>
     );

@@ -4,8 +4,8 @@ const CustomModal = ({ isOpen, onClose, onConfirm, title, text }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 px-2 ">
-            <div className="bg-white p-6 rounded-lg shadow-lg md:w-96 w-80  ">
+        <div className="fixed inset-0 z-50 flex items-center justify-center  px-2 ">
+            <div className="bg-gray-800 p-6 rounded-lg shadow-lg md:w-96 w-80 text-white ">
                 <h2 className="text-xl font-semibold mb-4">{title}</h2>
                 <p className="mb-4">{text}</p>
                 <div className="flex justify-end">

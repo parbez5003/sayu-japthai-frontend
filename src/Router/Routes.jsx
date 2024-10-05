@@ -111,8 +111,11 @@ const Routes = createBrowserRouter([
                 element: <PrivateRoute> <AdminPriveteRoute ><UpdateProduct /> </AdminPriveteRoute> </PrivateRoute>,
                 loader: ({ params }) =>
                     fetch(
-                        `https://sayu-japthai-backend.vercel.app/api/v1/products/${params.id}`
+                        `http://localhost:5000/api/v1/products/${params.id}`
                     ),
+                    // fetch(
+                    //     `https://sayu-japthai-backend.vercel.app/api/v1/products/${params.id}`
+                    // ),
             },
 
         ]

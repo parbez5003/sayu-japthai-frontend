@@ -228,7 +228,7 @@ const AddProduct = () => {
                 <button
                     type="submit"
                     disabled={loading || uploading}
-                    className=" flex items-center justify-center w-full lg:w-3/12 mx-auto py-3 rounded-lg bg-[#13dc46] text-white font-bold uppercase text-center cursor-pointer"
+                    className=" flex items-center justify-center w-full lg:w-3/12 mx-auto py-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-bold uppercase text-center cursor-pointer"
                 >
                     {loading ? "Please wait..." : "Add Product"}
                 </button>

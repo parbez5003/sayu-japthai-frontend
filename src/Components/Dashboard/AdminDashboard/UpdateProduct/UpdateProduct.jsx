@@ -235,7 +235,7 @@ const UpdateProduct = () => {
                 {/* Submit Button */}
                 <button
                     type="submit"
-                    className={`w-full lg:w-1/4 mx-auto px-5 py-2 text-center text-white font-medium rounded-md bg-blue-500 hover:bg-blue-600 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                    className={`flex items-center justify-center w-full lg:w-3/12 mx-auto py-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-bold uppercase text-center cursor-pointer ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
                     disabled={loading}
                 >
                     {loading ? "Updating..." : "Update Product"}
