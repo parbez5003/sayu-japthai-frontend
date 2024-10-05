@@ -1,0 +1,67 @@
+.zoom-in {
+    animation: zoom-in 10s ease-in-out;
+}
+
+@keyframes zoom-in {
+    0% {
+        transform: scale(1);
+    }
+
+    100% {
+        transform: scale(1.1);
+    }
+}
+
+
+.fade-out {
+    animation: fade-out 1s ease-in-out;
+}
+
+@keyframes fade-out {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.2;
+    }
+}
+
+
+.fade-in {
+    animation: fade-in 1s ease-in-out;
+}
+
+@keyframes fade-in {
+    0% {
+        opacity: 0;
+        /* Start with no opacity */
+    }
+
+    100% {
+        opacity: 1;
+        /* End with full opacity */
+    }
+}
+
+
+
+.carousel-item {
+    transition: background-color 1s ease-in-out;
+}
+
+.carousel-item.hidden {
+    background-color: transparent;
+}
+
+.carousel-item {
+    background-color: rgba(0, 0, 0, 0.9);
+}
+
+.image-wrapper {
+    transition: opacity 1s ease-in-out;
+}
+
+.image-wrapper.dark-out {
+    opacity: 0.2;
+}
