@@ -15,6 +15,10 @@ const AddProduct = () => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // State to store titles
+  const [titles, setTitles] = useState([]);
+  const [currentTitle, setCurrentTitle] = useState(""); // To handle input title
+
   const {
     imageUrl: coverImageUrl,
     uploadImage,
@@ -43,8 +47,17 @@ const AddProduct = () => {
         images.map((file) => uploadImage(file))
       );
 
-      const { name, price, description, category, quantity, measurement } =
-        data;
+      const {
+        name,
+        price,
+        description,
+        category,
+        quantity,
+        measurement,
+        tax,
+        add_ons_price,
+        sort_description,
+      } = data;
 
       const product = {
         image: uploadedImageURLs.filter(Boolean), // Remove any null values from the array
@@ -56,6 +69,10 @@ const AddProduct = () => {
         description,
         measurement,
         upload_time: new Date().toISOString(),
+        tax,
+        titles,
+        add_ons_price,
+        sort_description,
       };
       console.log(product);
       // Send the product data to the server
@@ -63,6 +80,7 @@ const AddProduct = () => {
 
       if (response.data) {
         toast.success("Product added successfully");
+        console.log(response.data)
         reset();
         setImages([]);
       } else {
@@ -74,6 +92,30 @@ const AddProduct = () => {
     } finally {
       setLoading(false);
     }
+  };
+  // Function to handle adding titles on Enter key press, specific to title input field only
+  const handleTitleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (currentTitle.trim()) {
+        // Only add title if it's not empty
+        setTitles([...titles, currentTitle.trim()]); // Add the current title to the array
+        setCurrentTitle(""); // Clear the input field
+      }
+    }
+  };
+
+  // Function to prevent form submission on Enter in any input except title
+  const handlePreventEnterSubmit = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+    }
+  };
+
+  // Function to remove a title from the array
+  const removeTitle = (index) => {
+    // Only remove the specific title that matches the index
+    setTitles(titles.filter((_, i) => i !== index));
   };
 
   return (
@@ -93,6 +135,7 @@ const AddProduct = () => {
                   {...register("name", { required: true })}
                   placeholder="Product Name"
                   type="text"
+                  onKeyDown={handlePreventEnterSubmit}
                 />
               </div>
 
@@ -103,6 +146,7 @@ const AddProduct = () => {
                   <select
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3"
                     {...register("category", { required: true })}
+                    onKeyDown={handlePreventEnterSubmit}
                   >
                     <option value="">Select Category</option>
                     <option value="Entree et accompagnement">
@@ -144,6 +188,7 @@ const AddProduct = () => {
                   <select
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3"
                     {...register("branch", { required: true })}
+                    onKeyDown={handlePreventEnterSubmit}
                   >
                     <option value="">Select Branch</option>
                     <option value="A">A</option>
@@ -162,6 +207,7 @@ const AddProduct = () => {
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3"
                     placeholder="Price"
                     {...register("price", { required: true })}
+                    onKeyDown={handlePreventEnterSubmit}
                   />
                 </div>
                 {/* price */}
@@ -172,7 +218,8 @@ const AddProduct = () => {
                     step="0.01"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3"
                     placeholder="Tax"
-                    {...register("tax", { required: true })}
+                    {...register("tax")}
+                    onKeyDown={handlePreventEnterSubmit}
                   />
                 </div>
               </div>
@@ -187,6 +234,7 @@ const AddProduct = () => {
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3"
                     placeholder="Quantity"
                     {...register("quantity")}
+                    onKeyDown={handlePreventEnterSubmit}
                   />
                 </div>
 
@@ -198,6 +246,7 @@ const AddProduct = () => {
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3"
                     placeholder="Measurement"
                     {...register("measurement")}
+                    onKeyDown={handlePreventEnterSubmit}
                   />
                 </div>
               </div>
@@ -207,9 +256,10 @@ const AddProduct = () => {
             <div className="w-full lg:w-4/12 mt-2">
               <h1 className="text-gray-600 text-lg mb-3">Description</h1>
               <textarea
-                className="bg-gray-50 lg:h-[100px] min-h-[210px] border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3"
+                className="bg-gray-50 h-[100px] md:h-[150px] lg:min-h-[210px] border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3"
                 {...register("description")}
                 placeholder="Description"
+                onKeyDown={handlePreventEnterSubmit}
               ></textarea>
             </div>
           </div>
@@ -224,18 +274,46 @@ const AddProduct = () => {
             Add Ons Product
           </h1>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 ">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {/* Titles Input and Display */}
           <div className="mt-2 w-full">
-            <label className="text-gray-600 text-lg">Title</label>
+            <label className="text-gray-600 text-lg">Titles</label>
+
+            {/* Display the list of added titles */}
+            {titles?.length > 0 && (
+              <div className="mb-1 ">
+                <ul className="flex flex-wrap gap-2">
+                  {titles?.map((title, index) => (
+                    <li
+                      key={index}
+                      className="bg-gray-200 text-gray-700 py-1 px-3 rounded-lg flex items-center"
+                    >
+                      {title}
+                      <button
+                        onClick={() => removeTitle(index)}
+                        className="ml-2 text-red-500 hover:text-red-700 text-xl "
+                      >
+                        x
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Title input field stays below the titles */}
+
             <input
               type="text"
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3"
               placeholder="Add Ons Product Title"
-              {...register("title")}
+              value={currentTitle}
+              onChange={(e) => setCurrentTitle(e.target.value)}
+              onKeyDown={handleTitleKeyDown} // Handle Enter key press
             />
           </div>
 
-          {/* price */}
+          {/* Price Input */}
           <div className="mt-2 w-full">
             <label className="text-gray-600 text-lg">Price</label>
             <input
@@ -243,17 +321,19 @@ const AddProduct = () => {
               step="0.01"
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3"
               placeholder="Price"
-              {...register("add_ons_price", { required: true })}
+              {...register("add_ons_price")}
+              onKeyDown={handlePreventEnterSubmit}
             />
           </div>
 
-          {/* Description */}
+          {/* Description Input */}
           <div className="mt-2 w-full">
             <label className="text-gray-600 text-lg">Sort Description</label>
             <textarea
               className="bg-gray-50 lg:h-[60px] min-h-[45px] border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3"
               {...register("sort_description")}
               placeholder="Sort Description...."
+              onKeyDown={handlePreventEnterSubmit}
             ></textarea>
           </div>
         </div>
@@ -297,7 +377,7 @@ const AddProduct = () => {
             >
               <label
                 for="dropzone-file"
-                className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50  hover:bg-gray-100  "
+                className="flex flex-col items-center justify-center w-full md:h-40 h-32  border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50  hover:bg-gray-100  "
               >
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <svg

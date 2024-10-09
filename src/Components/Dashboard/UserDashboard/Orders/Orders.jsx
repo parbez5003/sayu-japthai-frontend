@@ -95,7 +95,9 @@ const Orders = () => {
               {/* Recent Orders */}
               {recentOrders?.length > 0 && (
                 <div>
-                  <h2 className="text-xl font-medium py-2">Recent Orders (Last 24 hours)</h2>
+                  <h2 className="text-xl font-medium py-2">
+                    Recent Orders (Last 24 hours)
+                  </h2>
                   <OrderTable orders={recentOrders} />
                 </div>
               )}
@@ -119,7 +121,46 @@ const Orders = () => {
 const OrderTable = ({ orders }) => (
   <div className="overflow-x-auto">
     <table className="w-full mt-2">
-      
+      <thead>
+        <tr className="text-indigo-500 hover:text-indigo-700  ">
+          <th className="border bg-gray-100 border-gray-300 text-center text-sm md:text-md lg:text-lg py-3 pl-1">
+            N/A
+          </th>
+          <th className="border bg-gray-100 border-gray-300 text-center text-sm md:text-md lg:text-lg py-3">
+            Product Name
+          </th>
+
+          <th className="border bg-gray-100 border-gray-300 text-center text-sm md:text-md lg:text-lg p-2">
+            Image
+          </th>
+          <th className="border bg-gray-100 border-gray-300 text-center text-sm md:text-md lg:text-lg py-3">
+            Additional Item
+          </th>
+          <th className="border bg-gray-100 border-gray-300 text-center text-sm md:text-md lg:text-lg p-2">
+            Date
+          </th>
+          <th className="border bg-gray-100 border-gray-300 text-center text-sm md:text-md lg:text-lg p-2">
+            Quantity
+          </th>
+          <th className="border bg-gray-100 border-gray-300 text-center text-sm md:text-md lg:text-lg py-3">
+            Total Amount
+          </th>
+          <th className="border bg-gray-100 border-gray-300 text-center text-sm md:text-md lg:text-lg py-3">
+            Payment Status
+          </th>
+          <th className="border bg-gray-100 border-gray-300 text-center text-sm md:text-md lg:text-lg py-3">
+            Status
+          </th>
+          <th className="border bg-gray-100 border-gray-300 text-center text-sm md:text-md lg:text-lg py-3">
+            Delivered
+          </th>
+
+          <th className="border bg-gray-100 border-gray-300 text-center text-sm md:text-md lg:text-lg py-3">
+            Tnx Id
+          </th>
+        </tr>
+      </thead>
+
       <AnimatePresence>
         <tbody>
           {orders?.map((order, i) => (
@@ -135,17 +176,40 @@ const OrderTable = ({ orders }) => (
                   <td className="border bg-white border-gray-200 p-2 text-center">
                     {index + 1}
                   </td>
-                  <td className="border bg-white border-gray-200 md:p-2 p-1 text-sm w-60">{food?.name}</td>
+                  <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center">
+                    {food?.name}
+                  </td>
+                  
                   <td className="border bg-white border-gray-200 p-2">
-                    <img className="w-20 md:h-16 rounded-lg mx-auto" src={food?.product_image[0]} alt={food?.name} />
+                    <img
+                      className="w-20 md:h-16 rounded-lg mx-auto"
+                      src={food?.product_image[0]}
+                      alt={food?.name}
+                    />
                   </td>
                   <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center">
-                    {new Date(order?.date).toLocaleDateString()} - {new Date(order?.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
+                    {food?.addiotional_food ? food?.addiotional_food : "N/A"}
                   </td>
-                  <td className="border bg-white border-gray-200 p-4 text-sm md:text-md text-center">{food?.quantity}</td>
+                  <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center">
+                    {new Date(order?.date).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
+                    })}{" "}
+                    {new Date(order?.date).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
+                  </td>
+
+                  <td className="border bg-white border-gray-200 p-4 text-sm md:text-md text-center">
+                    {food?.quantity}
+                  </td>
                   <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center">
                     <div className="flex items-center justify-center gap-1">
-                      <FaEuroSign />  {(food?.unit_price * food?.quantity).toFixed(2)}
+                      <FaEuroSign />{" "}
+                      {(food?.unit_price * food?.quantity).toFixed(2)}
                     </div>
                   </td>
                   <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center">

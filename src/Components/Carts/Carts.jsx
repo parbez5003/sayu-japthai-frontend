@@ -58,6 +58,9 @@ export default function Carts() {
                                                     Product Name
                                                 </th>
                                                 <th className="border bg-black border-gray-600 text-center text-xs md:text-md lg:text-lg py-2 md:py-3">
+                                                Additional Item
+                                                </th>
+                                                <th className="border bg-black border-gray-600 text-center text-xs md:text-md lg:text-lg py-2 md:py-3">
                                                     Image
                                                 </th>
                                                 <th className="border bg-black border-gray-600 text-center text-xs md:text-md lg:text-lg py-2 md:py-3">

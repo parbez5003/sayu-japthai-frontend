@@ -7,7 +7,7 @@ const useAllOrdersProducts = () => {
     const { data: allOrdersProducts = [], isLoading  , refetch : orderRefetch} = useQuery({
         queryKey: ["allOrders"],
         queryFn: async () => {
-            const res = await axiosSecure.get("/allOrders");
+            const res = await axiosSecure.get("/isNotAllOrders");
             const allOrders = res.data;
 
             // Sort allOrders by lastLogin time in descending order

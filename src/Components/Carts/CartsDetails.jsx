@@ -109,6 +109,13 @@ const CartsDetails = ({ cart, myCartRefetch, i }) => {
                 <td className="border bg-black border-gray-600 md:p-2 p-1 text-sm text-center w-60">
                     {cart?.name}
                 </td>
+                <td className="border bg-black border-gray-600 md:p-2 p-1 text-sm text-center w-60">
+                {cart?.addiotional_food
+                                    ? cart?.addiotional_food
+                                    : "N/A"}
+                </td>
+                
+
                 <td className="border bg-black border-gray-600 p-2 text-center">
                     <img className="w-20 md:h-16 rounded-lg mx-auto" src={cart?.product_image}
                         alt={cart?.name} />
