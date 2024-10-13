@@ -14,7 +14,6 @@ export default function Home() {
       <NewsLatter />
 
       <Products />
-
     </div>
   )
 }

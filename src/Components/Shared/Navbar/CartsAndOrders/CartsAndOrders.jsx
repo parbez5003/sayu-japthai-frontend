@@ -13,7 +13,6 @@ export default function CartsAndOrders() {
 
 
     return (
-
         <>
             {
                 currentUser?.isAdmin ? (

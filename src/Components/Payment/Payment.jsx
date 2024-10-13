@@ -21,10 +21,11 @@ export default function Payment() {
     // console.log(formData);
 
     return (
-        <div className='lg:flex items-center bg-gray-100 lg:pb-20  lg:pt-6'>
+        <div className='lg:flex items-center bg-gray-100  '>
 
-            <div className='lg:w-5/12 w-full mx-auto text-gray-600 lg:h-full  rounded-lg  bg-gray-50 '>
-                <form onSubmit={handleSubmit(onSubmit)} className='lg:px-6 md:px-4 px-2'>
+            <div className='lg:w-1/2 w-full mx-auto  text-gray-600 lg:my-12  rounded-lg'>
+                <form onSubmit={handleSubmit(onSubmit)} className='lg:px-6 md:px-4 px-2 
+                 max-w-[500px] mx-auto bg-gray-50 shadow-lg'>
                     {/* road_number field */}
                     <div>
                         <h1 className='lg:text-3xl md:text-2xl fonts-semibold py-4'> Orders Address </h1>
@@ -37,7 +38,7 @@ export default function Payment() {
                             placeholder="Numéro de rue"
                             required
                             {...register("road_number")}
-                            className="shadow-sm text-sm rounded-sm block w-full p-2.5 border-2"
+                            className="shadow-sm text-sm rounded-sm block w-full p-2.5 border border-gray-400 "
                         />
                     </div>
                     {/* address field */}
@@ -49,7 +50,7 @@ export default function Payment() {
                             placeholder="Your Address"
                             required
                             {...register("address")}
-                            className="shadow-sm text-sm rounded-sm block w-full p-2.5 border-2"
+                            className="shadow-sm text-sm rounded-sm block w-full p-2.5 border border-gray-400"
                         />
                     </div>
                     {/* complement_address field */}
@@ -61,7 +62,7 @@ export default function Payment() {
                             placeholder="Complément d'adresse"
                             // required
                             {...register("complement_address")}
-                            className="shadow-sm text-sm rounded-sm block w-full p-2.5 border-2"
+                            className="shadow-sm text-sm rounded-sm block w-full p-2.5 border border-gray-400"
                         />
                     </div>
                     {/* post_code field */}
@@ -73,7 +74,7 @@ export default function Payment() {
                             placeholder="Code Postale"
                             required
                             {...register("post_code")}
-                            className="shadow-sm text-sm rounded-sm block w-full p-2.5 border-2"
+                            className="shadow-sm text-sm rounded-sm block w-full p-2.5 border border-gray-400"
                         />
                     </div>
                     {/* district field */}
@@ -85,7 +86,7 @@ export default function Payment() {
                             placeholder="Ville"
                             required
                             {...register("district")}
-                            className="shadow-sm text-sm rounded-sm block w-full p-2.5 border-2"
+                            className="shadow-sm text-sm rounded-sm block w-full p-2.5 border border-gray-400"
                         />
                     </div>
 
@@ -100,7 +101,7 @@ export default function Payment() {
                 </form>
             </div>
 
-            <div className='lg:w-7/12 w-full lg:mt-0 mt-6'>
+            <div className='lg:w-1/2 w-full mt-6'>
                 {/* Pass formData to CheckoutForm */}
                 <Elements stripe={stripePromise}>
                     <CheckoutForm formData={formData} />
