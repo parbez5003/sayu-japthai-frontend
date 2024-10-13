@@ -2,7 +2,6 @@ import React from 'react'
 import Banner from '../../Components/Banner/Banner'
 import NewsLatter from '../NewsLatter/NewsLatter'
 import Products from '../../Components/Products/Products'
-import Add from "../../Components/Dashboard/AdminDashboard/AddProduct/Add"
 
 
 export default function Home() {
@@ -15,10 +14,6 @@ export default function Home() {
       <NewsLatter />
 
       <Products />
-
-
-      {/* <Add></Add> */}
-
     </div>
   )
 }

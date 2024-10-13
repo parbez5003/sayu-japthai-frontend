@@ -12,16 +12,14 @@ export default function ProductCard({ product, myCartRefetch }) {
     _id,
     name,
     price,
-    tax,
     titles,
-    add_ons_price,
-    sort_description,
     description,
     image,
     ownerEmail,
     quantity: stockLimit,
     measurement,
   } = product || {};
+
   const axiosPublic = useAxiosPublic();
   const { currentUser } = useCurrentUser();
   const navigate = useNavigate();
@@ -38,25 +36,26 @@ export default function ProductCard({ product, myCartRefetch }) {
   const toggleDescription = () =>
     setDescriptionExpanded(!isDescriptionExpanded);
 
-  //   titles section
+  // State to track selected titles (with one selection per category)
+  const [selectedTitles, setSelectedTitles] = useState({});
 
-  // State to track selected titles
-  const [selectedTitles, setSelectedTitles] = useState([]);
-
-  
- // Function to handle single selection with the option to deselect
-const handleTitleChange = (title) => {
+  // Function to handle single selection with the option to deselect
+  const handleTitleChange = (category, title) => {
     setSelectedTitles((prevSelected) => {
-      if (prevSelected === title) {
-        // If the same title is clicked again, deselect it
-        return "";
+      const newSelection = { ...prevSelected };
+
+      if (newSelection[category] === title) {
+        // Deselect the title if it's already selected
+        delete newSelection[category];
       } else {
-        // Otherwise, select the clicked title
-        return title;
+        // Select the title for this category, deselect the previous one if any
+        newSelection[category] = title;
       }
+
+      return newSelection;
     });
   };
-  
+
   // handleAddToCart
   const handleAddToCart = async () => {
     if (!user) {
@@ -68,12 +67,12 @@ const handleTitleChange = (title) => {
         owner_email: ownerEmail,
         product_id: _id,
         unit_price: price,
-        total_price: price * quantity, // Adjust total price based on quantity
+        total_price: price * quantity,
         product_image: image,
         name,
         quantity,
         stock_limit: stockLimit,
-        addiotional_food: selectedTitles,
+        additional_food: selectedTitles || "",
       };
 
       try {
@@ -84,23 +83,27 @@ const handleTitleChange = (title) => {
         if (cartResponse.data) {
           toast.success("Product added to cart successfully!");
           myCartRefetch();
-          setModalOpen(false); // Close the modal after adding to cart
+          setModalOpen(false);
+          setSelectedTitles({});
         }
       } catch (error) {
-        toast.error("Product already in cart?");
+        toast.error("Error adding product to cart.");
         console.error("Error adding to cart:", error);
       }
     }
   };
 
   // Function to open and close modal
-  const toggleModal = () => setModalOpen((prev) => !prev);
+  const toggleModal = () => {
+    setModalOpen((prev) => !prev);
+    if (!isModalOpen) {
+      setSelectedTitles({}); // Reset selected title every time modal opens
+    }
+  };
 
   // Function to increase quantity
   const increaseQuantity = () => {
     setQuantity((prev) => prev + 1);
-    // if (quantity < stockLimit) {
-    // }
   };
 
   // Function to decrease quantity
@@ -169,108 +172,137 @@ const handleTitleChange = (title) => {
         </div>
       </motion.div>
 
-      {/* Modal */}
+      {/* modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 px-3 flex items-center justify-center bg-black bg-opacity-60 mt-10 md:mt-0  ">
-          <div className="bg-white p-4 rounded-lg shadow-lg w-full max-w-lg md:max-w-xl">
-            <div className="flex flex-col md:flex-row md:space-x-6">
-              {/* Product Image Section */}
-              <div className="md:w-1/2 flex flex-col justify-center items-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+          <div className="bg-white p-2 rounded-lg shadow-lg w-[300px] h-[500px] overflow-hidden">
+            <div className="flex flex-col h-full">
+              {/* Product Image Section (Fixed) */}
+              <div className="flex h-[200px] justify-center ">
                 <img
-                  className="md:w-3/4 w-full h-auto rounded-lg shadow-md"
+                  className="w-full object-contain rounded-lg shadow-md"
                   src={image}
                   alt={name}
                 />
-
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                  {name}
-                </h3>
               </div>
 
-              {/* Product Details Section */}
-              <div className="my-2  md:mt-0 md:w-1/2 flex flex-col justify-between">
-                <h3 className="text-xl font-normal font-poppins text-gray-900 mb-3">
-                  {titles.length > 0 ? " Additional Item" : "Additional Item None"}
+              {/* Modal Header (Fixed) */}
+              <h3 className="text-2xl font-bold text-gray-900 text-center my-1">
+                {name}
+              </h3>
+
+              {/* Scrollable Additional Items Section */}
+              <div className="flex-grow overflow-auto">
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  {Object.keys(titles).length > 0
+                    ? "Additional Items"
+                    : "No Additional Items"}
                 </h3>
-                <div>
-                  {/* Title Radio Buttons (Single selection) */}
-                  <form className="space-y-2 text-gray-700 mb-4">
-                    {titles.map((title, i) => (
-                      <div key={i} className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          id={`title-${i}`}
-                          name="title" // Group all radio buttons under the same name
-                          value={title}
-                          checked={selectedTitles === title} // Set checked if this title is selected
-                          onChange={() => handleTitleChange(title)} // Update state with the selected title
-                          className="form-radio h-5 w-5 text-indigo-600"
-                        />
-                        <label htmlFor={`title-${i}`} className="text-gray-900">
-                          {title}
-                        </label>
+
+                {/* Loop through categories in titles */}
+                <div className="space-y-4">
+                  {Object.entries(titles).map(
+                    ([category, items], categoryIndex) => (
+                      <div key={categoryIndex}>
+                        <h4 className="font-semibold text-gray-900 mb-2">
+                          {category}
+                        </h4>
+                        <form className="space-y-2 text-gray-700">
+                          {items.map((item, itemIndex) => (
+                            <div
+                              key={itemIndex}
+                              className="flex items-center space-x-2"
+                            >
+                              <input
+                                type="radio"
+                                id={`item-${categoryIndex}-${itemIndex}`}
+                                name={category}
+                                value={item.name}
+                                checked={selectedTitles[category] === item.name}
+                                onChange={() =>
+                                  handleTitleChange(category, item.name)
+                                }
+                                className="form-checkbox h-5 w-5 text-indigo-600"
+                              />
+                              <label
+                                htmlFor={`item-${categoryIndex}-${itemIndex}`}
+                                className="text-gray-900"
+                              >
+                                {item.name}
+                              </label>
+                            </div>
+                          ))}
+                        </form>
                       </div>
-                    ))}
-                  </form>
-
-                  {/* Display selected title */}
-                  <div className="my-4">
-                    <p className="text-gray-600  ">
-                      {titles.length > 0 ? " Selected Title : " : ""}{" "}
-                      <span className=" ml-1 font-semibold ">
-                        {selectedTitles}
-                      </span>
-                    </p>
-                  </div>
+                    )
+                  )}
                 </div>
 
-                {/* Price and Quantity */}
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-xl font-semibold text-gray-800 flex items-center">
-                    <FaEuroSign className="mr-1" />
-                    {(price * quantity).toFixed(2)}
+                {/* Display selected titles */}
+                <div className="my-4">
+                  <p className="text-gray-600">
+                    {Object.keys(selectedTitles).length > 0
+                      ? "Selected Items:"
+                      : ""}
+                  </p>
+                  <ul className="list-decimal list-inside">
+                    {Object.entries(selectedTitles).map(
+                      ([category, title], index) => (
+                        <li key={index} className="text-gray-800">
+                          <strong>{title}</strong>{" "}
+                        </li>
+                      )
+                    )}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Price and Quantity Section (Fixed) */}
+              <div className="flex items-center justify-between mb-4 mt-4">
+                <span className="text-xl font-semibold text-gray-800 flex items-center">
+                  <FaEuroSign className="mr-1" />
+                  {(price * quantity).toFixed(2)}
+                </span>
+
+                {/* Quantity Controls */}
+                <div className="flex items-center">
+                  <button
+                    className={`px-3 py-1 rounded-l-md text-white ${
+                      quantity > 1
+                        ? "bg-indigo-600"
+                        : "bg-gray-400 cursor-not-allowed"
+                    }`}
+                    onClick={decreaseQuantity}
+                    disabled={quantity === 1}
+                  >
+                    -
+                  </button>
+                  <span className="px-4 py-1 text-gray-900 bg-gray-200 border-t border-b">
+                    {quantity}
                   </span>
-
-                  {/* Quantity Controls */}
-                  <div className="flex items-center">
-                    <button
-                      className={`px-2 py-1 rounded-l-md text-white ${
-                        quantity > 1
-                          ? "bg-indigo-600"
-                          : "bg-gray-400 cursor-not-allowed"
-                      }`}
-                      onClick={decreaseQuantity}
-                      disabled={quantity === 1}
-                    >
-                      -
-                    </button>
-                    <span className="px-4 py-1 text-gray-900 bg-gray-200 border-t border-b">
-                      {quantity}
-                    </span>
-                    <button
-                      className="px-2 py-1 bg-indigo-600 text-white rounded-r-md"
-                      onClick={increaseQuantity}
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-
-                {/* Modal Action Buttons */}
-                <div className="flex justify-between">
                   <button
-                    className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition duration-200"
-                    onClick={toggleModal}
+                    className="px-3 py-1 bg-indigo-600 text-white rounded-r-md"
+                    onClick={increaseQuantity}
                   >
-                    Cancel
-                  </button>
-                  <button
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition duration-200"
-                    onClick={handleAddToCart}
-                  >
-                    Confirm Order
+                    +
                   </button>
                 </div>
+              </div>
+
+              {/* Modal Action Buttons (Fixed) */}
+              <div className="flex justify-between mt-2">
+                <button
+                  className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition duration-200"
+                  onClick={toggleModal}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-4 py-2 text-white rounded-md transition duration-200 bg-indigo-600 hover:bg-indigo-700"
+                  onClick={handleAddToCart}
+                >
+                  Confirm Order
+                </button>
               </div>
             </div>
           </div>

@@ -14,7 +14,7 @@ export default function Carts() {
 
     const { myCarts, price, quantity, isLoading, myCartRefetch } = useGetMyCarts();
 
-    // console.log(myCarts);
+    console.log(myCarts);
 
     if (isLoading) {
         return (

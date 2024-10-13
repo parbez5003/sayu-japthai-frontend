@@ -13,7 +13,9 @@ const AllOrdersProduct = () => {
   const axiosSecure = useAxiosSecure();
   const axiosPublic = useAxiosPublic();
   const { allOrdersProducts, isLoading, orderRefetch } = useAllOrdersProducts();
-  const {archiveOrderRefetch } = useAllArchidedOrders();
+  const { archiveOrderRefetch } = useAllArchidedOrders();
+
+  console.log(allOrdersProducts);
 
   // State for sorting option
   const [sortBy, setSortBy] = useState("all");
@@ -46,13 +48,12 @@ const AllOrdersProduct = () => {
     try {
       let updateData = {};
       if (actionType === "cancel") {
-        updateData = { isOrderCancel: true };
+        updateData = { isOrderCancel: true, isDelivered: false };
       } else if (actionType === "processing") {
         updateData = { isDelivered: true };
       } else if (actionType === "reject") {
         updateData = { isOrderCancel: false };
       }
-
       // Make a PUT request to update the order
       const res = await axiosSecure.put(`/updateOrder/${_id}`, updateData);
 
@@ -64,77 +65,75 @@ const AllOrdersProduct = () => {
     } catch (error) {
       // Handle errors
       toast.error("Failed to update order");
-      console.error("Error updating order:", error);
     }
   };
 
-
   // State setup
-const [isModalOpen, setIsModalOpen] = useState(false);
-const [selectedOrder, setSelectedOrder] = useState({ id: null, name: "" });
-const [selectedOrderIds, setSelectedOrderIds] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState({ id: null, name: "" });
+  const [selectedOrderIds, setSelectedOrderIds] = useState([]);
 
-// Handle individual order selection via checkbox
-const handleSelectOrder = (id) => {
-  setSelectedOrderIds((prev) => {
-    if (prev.includes(id)) {
-      return prev.filter((orderId) => orderId !== id);
-    }
-    return [...prev, id];
-  });
-};
+  // Handle individual order selection via checkbox
+  const handleSelectOrder = (id) => {
+    setSelectedOrderIds((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((orderId) => orderId !== id);
+      }
+      return [...prev, id];
+    });
+  };
 
-// Handle bulk archive by opening the modal
-const handleBulkArchive = () => {
-  if (selectedOrderIds.length > 0) {
-    setIsModalOpen(true); // Open modal to confirm bulk archive
-  } else {
-    toast.error("Please select at least one order to archive.");
-  }
-};
-
-// Handle the archive logic
-const handleConfirmArchive = async () => {
-  try {
+  // Handle bulk archive by opening the modal
+  const handleBulkArchive = () => {
     if (selectedOrderIds.length > 0) {
-      // Handle bulk archive
-      const response = await axiosPublic.post("/archiveOrders", {
-        ids: selectedOrderIds,
-      });
-      if (response.status === 200) {
-        toast.success(
-          `Successfully archived ${selectedOrderIds.length} orders.`
-        );
-        orderRefetch();
-        archiveOrderRefetch()
-      } else {
-        toast.error("Error occurred while archiving orders.");
-      }
-    } else if (selectedOrder.id) {
-      // Handle single order archive
-      const response = await axiosPublic.post(
-        `/archiveOrder/${selectedOrder.id}`
-      );
-      if (response.status === 200) {
-        toast.success(`Order "${selectedOrder.name}" archived successfully.`);
-        orderRefetch();
-        archiveOrderRefetch()
-      } else {
-        toast.error("Error occurred while archiving the order.");
-      }
+      setIsModalOpen(true); // Open modal to confirm bulk archive
+    } else {
+      toast.error("Please select at least one order to archive.");
     }
-  } catch (error) {
-    console.error("Error during archiving:", error);
-    toast.error("An error occurred while archiving.");
-  } finally {
-    // Close the modal and reset states
-    setIsModalOpen(false);
-    setSelectedOrder({ id: null, name: "" });
-    setSelectedOrderIds([]);
-  }
-};
+  };
 
-// loading 
+  // Handle the archive logic
+  const handleConfirmArchive = async () => {
+    try {
+      if (selectedOrderIds.length > 0) {
+        // Handle bulk archive
+        const response = await axiosPublic.post("/archiveOrders", {
+          ids: selectedOrderIds,
+        });
+        if (response.status === 200) {
+          toast.success(
+            `Successfully archived ${selectedOrderIds.length} orders.`
+          );
+          orderRefetch();
+          archiveOrderRefetch();
+        } else {
+          toast.error("Error occurred while archiving orders.");
+        }
+      } else if (selectedOrder.id) {
+        // Handle single order archive
+        const response = await axiosPublic.post(
+          `/archiveOrder/${selectedOrder.id}`
+        );
+        if (response.status === 200) {
+          toast.success(`Order "${selectedOrder.name}" archived successfully.`);
+          orderRefetch();
+          archiveOrderRefetch();
+        } else {
+          toast.error("Error occurred while archiving the order.");
+        }
+      }
+    } catch (error) {
+      console.error("Error during archiving:", error);
+      toast.error("An error occurred while archiving.");
+    } finally {
+      // Close the modal and reset states
+      setIsModalOpen(false);
+      setSelectedOrder({ id: null, name: "" });
+      setSelectedOrderIds([]);
+    }
+  };
+
+  // loading
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -154,7 +153,9 @@ const handleConfirmArchive = async () => {
             className="rounded-lg"
           >
             <div className="md:flex items-center  justify-between px-2">
-              <h1 className="text-2xl font-medium  md:text-right text-center  py-4 ">All Order List</h1>
+              <h1 className="text-2xl font-medium  md:text-right text-center  py-4 ">
+                All Order List
+              </h1>
               <div className="md:flex flex-col sm:flex-row items-center md:text-left text-center">
                 <label
                   htmlFor="sort"
@@ -243,8 +244,15 @@ const handleConfirmArchive = async () => {
                             </td>
 
                             <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center">
-                              {food?.addiotional_food
-                                ? food?.addiotional_food
+                              {typeof food?.additional_food === "object" &&
+                              food.additional_food !== null
+                                ? Object.entries(food?.additional_food)?.map(
+                                    ([key, value], index) => (
+                                      <div key={index}>
+                                        <strong>{key}:</strong> {value}
+                                      </div>
+                                    )
+                                  )
                                 : "N/A"}
                             </td>
 
@@ -361,162 +369,143 @@ const handleConfirmArchive = async () => {
                                 onChange={() => handleSelectOrder(order._id)}
                               />
                             </td>
-
                           </motion.tr>
                         ))}
 
                         {expandedOrders[order._id] &&
-                          order?.foods?.slice(1).map(
-                            (
-                              food,
-                              index
-                            ) => (
-                              <motion.tr
-                                key={`${order._id}-more-${index}`}
-                                initial={{ opacity: 0, y: -20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{
-                                  duration: 0.5,
-                                  delay: index * 0.1,
-                                }}
-                                exit={{ opacity: 0, y: -20 }}
-                              >
-                                <td className="border bg-white border-gray-200 p-2 text-center">
-                                  {index + 2}{" "}
-                                </td>
-                                <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center">
-                                  {food?.name}
-                                </td>
+                          order?.foods?.slice(1).map((food, index) => (
+                            <motion.tr
+                              key={`${order._id}-more-${index}`}
+                              initial={{ opacity: 0, y: -20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{
+                                duration: 0.5,
+                                delay: index * 0.1,
+                              }}
+                              exit={{ opacity: 0, y: -20 }}
+                            >
+                              <td className="border bg-white border-gray-200 p-2 text-center">
+                                {index + 2}{" "}
+                              </td>
+                              <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center">
+                                {food?.name}
+                              </td>
 
-                                <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center">
-                                  {food?.addiotional_food
-                                    ? food?.addiotional_food
-                                    : "N/A"}
-                                </td>
-                                <td className="border bg-white border-gray-200 p-2">
-                                  <img
-                                    className="w-20 md:h-16 rounded-lg mx-auto"
-                                    src={food?.product_image[0]}
-                                    alt={food?.name}
-                                  />
-                                </td>
-                                <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center">
-                                  {new Date(order?.date).toLocaleDateString()}{" "}
-                                  {new Date(order?.date).toLocaleTimeString(
-                                    [],
-                                    {
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                      hour12: true,
-                                    }
+                              <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center">
+                                {food?.addiotional_food
+                                  ? food?.addiotional_food
+                                  : "N/A"}
+                              </td>
+                              <td className="border bg-white border-gray-200 p-2">
+                                <img
+                                  className="w-20 md:h-16 rounded-lg mx-auto"
+                                  src={food?.product_image[0]}
+                                  alt={food?.name}
+                                />
+                              </td>
+                              <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center">
+                                {new Date(order?.date).toLocaleDateString()}{" "}
+                                {new Date(order?.date).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: true,
+                                })}
+                              </td>
+                              <td className="border bg-white border-gray-200 p-4 text-sm md:text-md text-center">
+                                {food?.quantity}
+                              </td>
+                              <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center">
+                                <div className="flex items-center justify-center gap-1">
+                                  <FaEuroSign />{" "}
+                                  {(food?.unit_price * food?.quantity).toFixed(
+                                    2
                                   )}
-                                </td>
-                                <td className="border bg-white border-gray-200 p-4 text-sm md:text-md text-center">
-                                  {food?.quantity}
-                                </td>
-                                <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center">
-                                  <div className="flex items-center justify-center gap-1">
-                                    <FaEuroSign />{" "}
-                                    {(
-                                      food?.unit_price * food?.quantity
-                                    ).toFixed(2)}
-                                  </div>
-                                </td>
-                                <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center">
-                                  {order?.isPaid ? "Paid" : "Unpaid"}
-                                </td>
-                                <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center cursor-pointer">
-                                  <div>
-                                    {order?.isOrderCancel ? (
-                                      <div
-                                        onClick={() =>
-                                          handleOrderUpdate(
-                                            order?._id,
-                                            "reject"
-                                          )
-                                        }
-                                        className="text-white bg-red-600 p-1 rounded"
-                                      >
-                                        Re Order
-                                      </div>
-                                    ) : (
-                                      <div
-                                        onClick={() =>
-                                          handleOrderUpdate(
-                                            order?._id,
-                                            "cancel"
-                                          )
-                                        }
-                                        className="text-white bg-green-500  p-1 rounded"
-                                      >
-                                        Cancel
-                                      </div>
-                                    )}
-                                  </div>
-                                </td>
-                                <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center cursor-pointer">
-                                  <div>
-                                    {order?.isOrderCancel ? (
-                                      <div className="opacity-60 cursor-not-allowed">
-                                        {order?.isDelivered ? (
-                                          <div className="text-white bg-green-500 p-1 rounded">
-                                            Delivered
-                                          </div>
-                                        ) : (
-                                          <div className="text-white bg-yellow-600 p-1 rounded">
-                                            Processing
-                                          </div>
-                                        )}
-                                      </div>
-                                    ) : (
-                                      <div className="">
-                                        {order?.isDelivered ? (
-                                          <div className="text-white bg-green-500 p-1 rounded">
-                                            Delivered
-                                          </div>
-                                        ) : (
-                                          <div
-                                            onClick={() =>
-                                              handleOrderUpdate(
-                                                order?._id,
-                                                "processing"
-                                              )
-                                            }
-                                            className="text-white bg-yellow-600 p-1 rounded"
-                                          >
-                                            Processing
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
-                                  </div>
-                                </td>
-                                <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center">
-                                  {order?.road_number} , {order?.address} ,{" "}
-                                  {order?.complement_address} ,{" "}
-                                  {order?.post_code} , {order?.district}{" "}
-                                </td>
-                                <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center">
-                                  {order?.transactionId
-                                    ? order?.transactionId
-                                    : "N/A"}
-                                </td>
+                                </div>
+                              </td>
+                              <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center">
+                                {order?.isPaid ? "Paid" : "Unpaid"}
+                              </td>
+                              <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center cursor-pointer">
+                                <div>
+                                  {order?.isOrderCancel ? (
+                                    <div
+                                      onClick={() =>
+                                        handleOrderUpdate(order?._id, "reject")
+                                      }
+                                      className="text-white bg-red-600 p-1 rounded"
+                                    >
+                                      Re Order
+                                    </div>
+                                  ) : (
+                                    <div
+                                      onClick={() =>
+                                        handleOrderUpdate(order?._id, "cancel")
+                                      }
+                                      className="text-white bg-green-500  p-1 rounded"
+                                    >
+                                      Cancel
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center cursor-pointer">
+                                <div>
+                                  {order?.isOrderCancel ? (
+                                    <div className="opacity-60 cursor-not-allowed">
+                                      {order?.isDelivered ? (
+                                        <div className="text-white bg-green-500 p-1 rounded">
+                                          Delivered
+                                        </div>
+                                      ) : (
+                                        <div className="text-white bg-yellow-600 p-1 rounded">
+                                          Processing
+                                        </div>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div className="">
+                                      {order?.isDelivered ? (
+                                        <div className="text-white bg-green-500 p-1 rounded">
+                                          Delivered
+                                        </div>
+                                      ) : (
+                                        <div
+                                          onClick={() =>
+                                            handleOrderUpdate(
+                                              order?._id,
+                                              "processing"
+                                            )
+                                          }
+                                          className="text-white bg-yellow-600 p-1 rounded"
+                                        >
+                                          Processing
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center">
+                                {order?.road_number} , {order?.address} ,{" "}
+                                {order?.complement_address} , {order?.post_code}{" "}
+                                , {order?.district}{" "}
+                              </td>
+                              <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center">
+                                {order?.transactionId
+                                  ? order?.transactionId
+                                  : "N/A"}
+                              </td>
 
-                                {/* delte product check box  */}
-                                <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center">
-                                  <input
-                                    type="checkbox"
-                                    checked={selectedOrderIds.includes(
-                                      order._id
-                                    )}
-                                    onChange={() =>
-                                      handleSelectOrder(order._id)
-                                    }
-                                  />
-                                </td>
-                              </motion.tr>
-                            )
-                          )}
+                              {/* delte product check box  */}
+                              <td className="border bg-white border-gray-200 p-2 text-sm md:text-md text-center">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedOrderIds.includes(order._id)}
+                                  onChange={() => handleSelectOrder(order._id)}
+                                />
+                              </td>
+                            </motion.tr>
+                          ))}
 
                         {order?.foods?.length > 0 && (
                           <tr>
@@ -565,8 +554,6 @@ const handleConfirmArchive = async () => {
           }
         />
       </div>
-
-      
     </>
   );
 };

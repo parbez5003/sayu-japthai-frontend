@@ -49,7 +49,7 @@ const Orders = () => {
   return (
     <>
       <div className="px-2 md:py-3 text-gray-800 bg-gray-200 ">
-        {orderData.length === 0 ? (
+        {orderData?.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-screen fonts-normal">
             <p className="text-gray-700 my-4 text-2xl">Order not found</p>
             <Link to={"/"}>
