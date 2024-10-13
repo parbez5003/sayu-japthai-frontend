@@ -16,7 +16,6 @@ const DashboardState = () => {
   const [products] = useAllProducts();
   const { totalOrders, isLoading, totalOrderRefetch } = useTotalOrders();
   console.log(totalOrders);
-  
 
   const previousOrdersCount = useRef(totalOrders?.length || 0);
 
@@ -34,10 +33,10 @@ const DashboardState = () => {
   }, [totalOrders, totalOrderRefetch, isAdmin]);
 
   // Calculate total sell amount
-  const totalSellAmount = totalOrders?.reduce(
-    (sum, order) => sum + (order?.total_amount || 0),
-    0
-  );
+
+  const totalSellAmount = totalOrders
+    ?.reduce((acc, order) => acc + (order?.total_amount || 0), 0)
+    ?.toFixed(2);
 
   const totalPaidOrder =
     totalOrders?.filter((order) => order?.isPaid)?.length || 0;

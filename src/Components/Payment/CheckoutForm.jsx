@@ -7,11 +7,15 @@ import {
 } from "@stripe/react-stripe-js";
 import { useState } from "react";
 import useGetMyCarts from "../../Hooks/useGetMyCarts";
-import { FaCreditCard, FaCalendarAlt, FaLock } from "react-icons/fa";
+import {
+  FaCreditCard,
+  FaCalendarAlt,
+  FaLock,
+  FaEuroSign,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import useAxiosSecure from "../../Hooks/useAxiosSecure";
 import { toast } from "react-hot-toast";
-import { FaEuroSign } from "react-icons/fa";
 
 // InputField component for rendering form fields
 const InputField = ({ label, icon: Icon, children }) => (
@@ -62,7 +66,11 @@ export default function CheckoutForm({ formData }) {
     try {
       if (paymentMethod === "card") {
         // Request payment intent from the back-end
-        const { data } = await axiosSecure.post("/order", { email });
+        const { data } = await axiosSecure.post("/order", {
+          email,
+          amount: Math.round(price * 100), // Convert euros to cents
+        });
+
         if (!data.success) throw new Error("Error creating payment intent");
 
         const { clientSecret } = data;
@@ -103,7 +111,6 @@ export default function CheckoutForm({ formData }) {
             post_code,
             district,
           };
-          console.log(paymentInformation);
 
           await axiosSecure.post("/orderSuccess", paymentInformation);
           toast.success("Payment successfully processed.");
@@ -146,6 +153,7 @@ export default function CheckoutForm({ formData }) {
       }
     } catch (error) {
       toast.error(`Error: ${error.message}`);
+    } finally {
       setIsProcessing(false);
     }
   };
