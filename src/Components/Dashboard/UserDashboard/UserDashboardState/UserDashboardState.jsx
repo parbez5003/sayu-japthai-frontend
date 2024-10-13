@@ -6,7 +6,6 @@ import { FaEuroSign } from "react-icons/fa";
 const UserDashboardState = () => {
   const { orderData, isLoading } = useOrderHistory();
 
-
   // Calculate the number of paid orders
   const totalPaidOrders = orderData?.filter((order) => order.isPaid).length;
 
